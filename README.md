@@ -1,0 +1,1 @@
+Small script calculating frequency analysis of a cipher.
