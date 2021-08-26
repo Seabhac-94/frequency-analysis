@@ -1,3 +1,5 @@
+import operator
+
 cipher = """lrvmnir bpr sumvbwvr jx bpr lmiwv yjeryrkbi jx qmbm wi
 bpr xjvni mkd ymibrut jx irhx wi bpr riirkvr jx
 ymbinlmtmipw utn qmumbr dj w ipmhh but bj rhnvwdmbr bpr
@@ -19,6 +21,14 @@ class Attack:
     def __init__(self):
         self.alphabet = "abcdefghijklmnopqrstuvwxyz"
         self.freq = {}
+        self.freq_eng = {
+                        'a': 0.0817, 'b': 0.0150, 'c': 0.0278, 'd': 0.0425, 'e': 0.1270, 'f': 0.0223,
+                        'g': 0.0202, 'h': 0.0609, 'i': 0.0697, 'j': 0.0015, 'k': 0.0077, 'l': 0.0403,
+                        'm': 0.0241, 'n': 0.0675, 'o': 0.0751, 'p': 0.0193, 'q': 0.0010, 'r': 0.0599,
+                        's': 0.0633, 't': 0.0906, 'u': 0.0276, 'v': 0.0098, 'w': 0.0236, 'x': 0.0015,
+                        'y': 0.0197, 'z': 0.0007
+                        }
+        self.mappings = {}
 
     def calculate_freq(self, cipher):
         for c in self.alphabet:
@@ -42,7 +52,19 @@ class Attack:
                 print()
             new_line_count += 1
 
+    def calculate_matches(self):
+        for cipher_char in self.alphabet:
+            map = {}
+            for plain_char in self.alphabet:
+                map[plain_char] = round(abs(self.freq[cipher_char] - self.freq_eng[plain_char]), 4)
+            self.mappings[cipher_char] = sorted(map.items(), key=operator.itemgetter(1))
+
 
 attack = Attack()
 attack.calculate_freq(cipher)
 attack.print_freq()
+print('\n')
+attack.calculate_matches()
+
+for c in attack.mappings:
+    print(c, attack.mappings[c])
