@@ -1,4 +1,5 @@
 import operator
+import sys
 
 cipher = """lrvmnir bpr sumvbwvr jx bpr lmiwv yjeryrkbi jx qmbm wi
 bpr xjvni mkd ymibrut jx irhx wi bpr riirkvr jx
@@ -23,6 +24,7 @@ class Attack:
         self.plain_chars_left = "abcdefghijklmnopqrstuvwxyz"
         self.cipher_chars_left = "abcdefghijklmnopqrstuvwxyz"
         self.freq = {}
+        self.key = {}
         self.freq_eng = {
                         'a': 0.0817, 'b': 0.0150, 'c': 0.0278, 'd': 0.0425, 'e': 0.1270, 'f': 0.0223,
                         'g': 0.0202, 'h': 0.0609, 'i': 0.0697, 'j': 0.0015, 'k': 0.0077, 'l': 0.0403,
@@ -61,15 +63,24 @@ class Attack:
                 map[plain_char] = round(abs(self.freq[cipher_char] - self.freq_eng[plain_char]), 4)
             self.mappings[cipher_char] = sorted(map.items(), key=operator.itemgetter(1))
 
+    def set_key_mapping(self, cipher_char, plain_char):
+        if cipher_char not in self.cipher_chars_left or plain_char not in self.plain_chars_left:
+            print("ERROR: key mapping error", cipher_char, plain_char)
+            sys.exit(-1)
+        self.key[cipher_char] = plain_char
+        self.plain_chars_left = self.plain_chars_left.replace(plain_char, '')
+        self.cipher_chars_left = self.cipher_chars_left.replace(cipher_char, '')
+
     def guess_key(self):
-        key = {}
         for cipher_char in self.cipher_chars_left:
             for plain_char, diff in self.mappings[cipher_char]:
                 if plain_char in self.plain_chars_left:
-                    key[cipher_char] = plain_char
+                    self.key[cipher_char] = plain_char
                     self.plain_chars_left = self.plain_chars_left.replace(plain_char, '')
                     break
-        return key
+
+    def get_key(self):
+        return self.key
 
 
 def decrypt(key, cipher):
@@ -87,11 +98,52 @@ attack.calculate_freq(cipher)
 attack.print_freq()
 print('\n')
 attack.calculate_matches()
-key = attack.guess_key()
+# guessing keys based on frequency and comparing text after each addition and print
+attack.set_key_mapping('a', 'x')
+attack.set_key_mapping('d', 'd')
+attack.set_key_mapping('e', 'v')
+attack.set_key_mapping('m', 'a')
+attack.set_key_mapping('p', 'h')
+attack.set_key_mapping('q', 'k')
+attack.set_key_mapping('r', 'e')
+attack.set_key_mapping('s', 'p')
+attack.set_key_mapping('t', 'y')
+attack.set_key_mapping('u', 'r')
+attack.set_key_mapping('v', 'c')
+attack.set_key_mapping('w', 'i')
+attack.set_key_mapping('x', 'f')
+attack.set_key_mapping('y', 'm')
+# end guessing
+attack.guess_key()
+key = attack.get_key()
 print()
 print(key)
 message = decrypt(key, cipher)
+message_lines = message.splitlines()
+cipher_lines = cipher.splitlines()
+for i in range(len(message_lines)):
+    print('P:', message_lines[i])
+    print('C:', cipher_lines[i])
 print(message)
 
 # for c in attack.mappings:
 #     print(c, attack.mappings[c])
+
+# partially decrypted message:
+
+# because the practice of the basic movements of kata is
+# the focus and mastery of self is the essence of
+# matsubayashi ryu karate do i shall try to elucidate the
+# movements of the kata according to my interpretation
+# based on forty years of study
+#   it is not an easy task to explain each movement and its
+# significance and some must remain unexplained to give a
+# complete explanation one jould have to be qualified and
+# inspired to such an extent that he could reach the state
+# of enlightened mind capable of recognizing soundless
+# sound and shapeless shape i do not deem myself the final
+# authority but my experience jith kata has left no doubt
+# that the follojing is the proper application and
+# interpretation i offer my theories in the hope that the
+# essence of okinajan karate jill remain intact
+
