@@ -1,1 +1,1 @@
-Small script calculating frequency analysis of a cipher.
+Small script calculating frequency analysis of a cipher, and a small script that uses the analysis to break the substitution cipher.
